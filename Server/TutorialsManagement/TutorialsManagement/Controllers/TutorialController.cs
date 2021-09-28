@@ -20,7 +20,7 @@ namespace TutorialsManagement.Controllers
             _manageService = manageService;
         }
 
-        [HttpGet]
+        [HttpGet] // link: http://localhost:56528/api/v1/tutorial
         public async Task<Response<List<Tutorial>>> GetTutorialsList()
         {
             var tutorialsList = await _manageService.GetTutorialsList();
@@ -28,7 +28,7 @@ namespace TutorialsManagement.Controllers
             return new Response<List<Tutorial>>(tutorialsList);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}")] // link: http://localhost:56528/api/v1/tutorial/1
         public async Task<Response<Tutorial>> GetTutorialById(int id)
         {
             var tutorialDetail = await _manageService.GetTutorialById(id);
@@ -36,7 +36,7 @@ namespace TutorialsManagement.Controllers
             return new Response<Tutorial>(tutorialDetail);
         }
 
-        [HttpGet("find/{keyword}")]
+        [HttpGet("find/{keyword}")] // link: http://localhost:56528/api/v1/tutorial/find/react
         public async Task<Response<List<Tutorial>>> FindTutorials(string keyword)
         {
             var tutorialsList = await _manageService.FindTutorials(keyword);
@@ -44,7 +44,12 @@ namespace TutorialsManagement.Controllers
             return new Response<List<Tutorial>>(tutorialsList);
         }
 
-        [HttpPost]
+        [HttpPost] // link: http://localhost:56528/api/v1/tutorial
+        //Body > raw > JSON:
+        //{
+        //    "Title": "Test",
+        //    "Description": "Desc"
+        //}
         public async Task<Response<TutorialResponseModel>> CreateNewTutorial([FromBody] Tutorial tutorial)
         {
             try
@@ -63,7 +68,14 @@ namespace TutorialsManagement.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut] // link: http://localhost:56528/api/v1/tutorial
+        //Body > raw > JSON:
+        //{
+        //    "Id": 1,
+        //    "Title": "Test 2",
+        //    "Description": "Desc 2"
+        //    "Published": true
+        //}
         public async Task<Response<TutorialResponseModel>> EditEmployee([FromBody] Tutorial tutorial)
         {
             try
@@ -82,7 +94,7 @@ namespace TutorialsManagement.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}")] // link: http://localhost:56528/api/v1/tutorial/1
         public async Task<Response<TutorialResponseModel>> DeleteTutorial(int id)
         {
             try
@@ -101,7 +113,7 @@ namespace TutorialsManagement.Controllers
             }
         }
 
-        [HttpDelete("all")]
+        [HttpDelete("all")] // link: http://localhost:56528/api/v1/tutorial/all
         public async Task<Response<TutorialResponseModel>> DeleteAllTutorials()
         {
             try
