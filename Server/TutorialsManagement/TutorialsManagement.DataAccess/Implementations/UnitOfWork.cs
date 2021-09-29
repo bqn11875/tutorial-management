@@ -19,10 +19,9 @@ namespace TutorialsManagement.DataAccess.Implementations
             _context = context;
         }
 
-        public List<object> ExecuteReader(string commandText)
+        public DataTable ExecuteReader(string commandText)
         {
             var conn = new SqlConnection(_context.Database.GetDbConnection().ConnectionString);
-            var list = new List<object>();
 
             try
             {
@@ -31,25 +30,17 @@ namespace TutorialsManagement.DataAccess.Implementations
                     conn.Open();
                 }
 
-                using (var command = new SqlCommand(string.Format("exec {0}", commandText), conn))
+                using (var cmd = new SqlCommand(commandText, conn))
                 {
-                    SqlDataReader reader = command.ExecuteReader();
-                    var fieldCount = reader.FieldCount;
-                    while (reader.Read())
-                    {
-                        var fieldValues = new object[fieldCount];
-                        int instances = reader.GetValues(fieldValues);
-                        for (int fieldCounter = 0; fieldCounter < fieldCount; fieldCounter++)
-                        {
-                            if (Convert.IsDBNull(fieldValues[fieldCounter]))
-                                fieldValues[fieldCounter] = "NA";
-                        }
-                        list.Add(fieldValues);
-                    }
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    var da = new SqlDataAdapter(cmd);
+                    var ds = new DataSet();
+                    da.Fill(ds);
 
                     conn.Close();
 
-                    return list;
+                    return ds.Tables[0];
                 }
             }
             catch (Exception)
@@ -58,10 +49,9 @@ namespace TutorialsManagement.DataAccess.Implementations
             }
         }
 
-        public List<object> ExecuteReader(string commandText, SqlParameter[] parameters = null)
+        public DataTable ExecuteReader(string commandText, SqlParameter[] parameters = null)
         {
             var conn = new SqlConnection(_context.Database.GetDbConnection().ConnectionString);
-            var list = new List<object>();
 
             try
             {
@@ -70,89 +60,24 @@ namespace TutorialsManagement.DataAccess.Implementations
                     conn.Open();
                 }
 
-                var parameterBuilder = new StringBuilder();
-                if (parameters != null && parameters.Any())
+                using (var cmd = new SqlCommand(commandText, conn))
                 {
-                    for (int i = 0; i < parameters.Length; i++)
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    if (parameters != null && parameters.Any())
                     {
-                        if (parameters[i].SqlDbType == SqlDbType.VarChar
-                            || parameters[i].SqlDbType == SqlDbType.NVarChar
-                            || parameters[i].SqlDbType == SqlDbType.Char
-                            || parameters[i].SqlDbType == SqlDbType.NChar
-                            || parameters[i].SqlDbType == SqlDbType.Text
-                            || parameters[i].SqlDbType == SqlDbType.NText)
+                        foreach (var parameter in parameters)
                         {
-                            parameterBuilder.Append(string.Format("@{0} = '{1}'", parameters[i].ParameterName,
-                                string.IsNullOrEmpty(parameters[i].Value.ToString())
-                                ? string.Empty : parameters[i].Value.ToString()));
-                        }
-                        else if (parameters[i].SqlDbType == SqlDbType.BigInt
-                            || parameters[i].SqlDbType == SqlDbType.Int
-                            || parameters[i].SqlDbType == SqlDbType.SmallInt
-                            || parameters[i].SqlDbType == SqlDbType.TinyInt
-                            || parameters[i].SqlDbType == SqlDbType.Float
-                            || parameters[i].SqlDbType == SqlDbType.Decimal
-                            || parameters[i].SqlDbType == SqlDbType.Money
-                            || parameters[i].SqlDbType == SqlDbType.SmallMoney)
-                        {
-                            parameterBuilder.Append(string.Format("@{0} = {1}", parameters[i].ParameterName,
-                                parameters[i].Value));
-                        }
-                        else if (parameters[i].SqlDbType == SqlDbType.Bit)
-                        {
-                            parameterBuilder.Append(string.Format("@{0} = {1}", parameters[i].ParameterName,
-                                Convert.ToBoolean(parameters[i].Value)));
-                        }
-
-                        if (i < parameters.Length - 1)
-                        {
-                            parameterBuilder.Append(",");
+                            cmd.Parameters.Add($"@{parameter.ParameterName}", parameter.SqlDbType).Value = parameter.Value;
                         }
                     }
 
-                    using (var command = new SqlCommand(string.Format("exec {0} {1}", commandText, parameterBuilder.ToString()), conn))
-                    {
-                        SqlDataReader reader = command.ExecuteReader();
-                        var fieldCount = reader.FieldCount;
-                        while (reader.Read())
-                        {
-                            var fieldValues = new object[fieldCount];
-                            int instances = reader.GetValues(fieldValues);
-                            for (int fieldCounter = 0; fieldCounter < fieldCount; fieldCounter++)
-                            {
-                                if (Convert.IsDBNull(fieldValues[fieldCounter]))
-                                    fieldValues[fieldCounter] = "NA";
-                            }
-                            list.Add(fieldValues);
-                        }
+                    var da = new SqlDataAdapter(cmd);
+                    var ds = new DataSet();
+                    da.Fill(ds);
 
-                        conn.Close();
+                    conn.Close();
 
-                        return list;
-                    }
-                }
-                else
-                {
-                    using (var command = new SqlCommand(string.Format("exec {0}", commandText), conn))
-                    {
-                        SqlDataReader reader = command.ExecuteReader();
-                        var fieldCount = reader.FieldCount;
-                        while (reader.Read())
-                        {
-                            var fieldValues = new object[fieldCount];
-                            int instances = reader.GetValues(fieldValues);
-                            for (int fieldCounter = 0; fieldCounter < fieldCount; fieldCounter++)
-                            {
-                                if (Convert.IsDBNull(fieldValues[fieldCounter]))
-                                    fieldValues[fieldCounter] = "NA";
-                            }
-                            list.Add(fieldValues);
-                        }
-
-                        conn.Close();
-
-                        return list;
-                    }
+                    return ds.Tables[0];
                 }
             }
             catch (Exception)
@@ -169,48 +94,15 @@ namespace TutorialsManagement.DataAccess.Implementations
                 conn.Open();
             }
 
-            var parameterBuilder = new StringBuilder();
+            var cmd = new SqlCommand(commandText, conn);
+            cmd.CommandType = CommandType.StoredProcedure;
             if (parameters != null && parameters.Any())
             {
-                for (int i = 0; i < parameters.Length; i++)
+                foreach (var parameter in parameters)
                 {
-                    if (parameters[i].SqlDbType == SqlDbType.VarChar
-                        || parameters[i].SqlDbType == SqlDbType.NVarChar
-                        || parameters[i].SqlDbType == SqlDbType.Char
-                        || parameters[i].SqlDbType == SqlDbType.NChar
-                        || parameters[i].SqlDbType == SqlDbType.Text
-                        || parameters[i].SqlDbType == SqlDbType.NText)
-                    {
-                        parameterBuilder.Append(string.Format("@{0} = '{1}'", parameters[i].ParameterName,
-                            string.IsNullOrEmpty(parameters[i].Value.ToString())
-                            ? string.Empty : parameters[i].Value.ToString()));
-                    }
-                    else if (parameters[i].SqlDbType == SqlDbType.BigInt
-                        || parameters[i].SqlDbType == SqlDbType.Int
-                        || parameters[i].SqlDbType == SqlDbType.SmallInt
-                        || parameters[i].SqlDbType == SqlDbType.TinyInt
-                        || parameters[i].SqlDbType == SqlDbType.Float
-                        || parameters[i].SqlDbType == SqlDbType.Decimal
-                        || parameters[i].SqlDbType == SqlDbType.Money
-                        || parameters[i].SqlDbType == SqlDbType.SmallMoney)
-                    {
-                        parameterBuilder.Append(string.Format("@{0} = {1}", parameters[i].ParameterName,
-                            parameters[i].Value));
-                    }
-                    else if (parameters[i].SqlDbType == SqlDbType.Bit)
-                    {
-                        parameterBuilder.Append(string.Format("@{0} = {1}", parameters[i].ParameterName,
-                            Convert.ToBoolean(parameters[i].Value)));
-                    }
-
-                    if (i < parameters.Length - 1)
-                    {
-                        parameterBuilder.Append(",");
-                    }
+                    cmd.Parameters.Add($"@{parameter.ParameterName}", parameter.SqlDbType).Value = parameter.Value;
                 }
             }
-
-            var cmd = new SqlCommand(string.Format("exec {0} {1}", commandText, parameterBuilder.ToString()), conn);
 
             var id = cmd.ExecuteScalar(); // return just inserted record's id
 

@@ -22,17 +22,15 @@ namespace TutorialsManagement.Services.Implementations
 
         public Task<List<Tutorial>> GetTutorialsList()
         {
-            var tutorialsList = _unitOfWork.ExecuteReader("GetTutorials");
+            var tutorialsList = _unitOfWork.ExecuteReader("GetTutorials").AsEnumerable();
             var tutorialsListModel = tutorialsList.Select(item =>
             {
-                var values = (object[])item;
-
                 return new Tutorial()
                 {
-                    Id = (int)values[0],
-                    Title = (string)values[1],
-                    Description = (string)values[2],
-                    Published = (bool)values[3]
+                    Id = item.Field<int>("Id"),
+                    Title = item.Field<string>("Title"),
+                    Description = item.Field<string>("Description"),
+                    Published = item.Field<bool>("Published")
                 };
             }).ToList();
 
@@ -52,17 +50,15 @@ namespace TutorialsManagement.Services.Implementations
                 }
             };
 
-            var tutorial = _unitOfWork.ExecuteReader("GetTutorialById", sqlParameters);
+            var tutorial = _unitOfWork.ExecuteReader("GetTutorialById", sqlParameters).AsEnumerable();
             var tutorialModel = tutorial.Select(item =>
             {
-                var values = (object[])item;
-
                 return new Tutorial()
                 {
-                    Id = (int)values[0],
-                    Title = (string)values[1],
-                    Description = (string)values[2],
-                    Published = (bool)values[3]
+                    Id = item.Field<int>("Id"),
+                    Title = item.Field<string>("Title"),
+                    Description = item.Field<string>("Description"),
+                    Published = item.Field<bool>("Published")
                 };
             }).SingleOrDefault();
 
@@ -82,17 +78,15 @@ namespace TutorialsManagement.Services.Implementations
                 }
             };
 
-            var tutorialsList = _unitOfWork.ExecuteReader("FindTutorials", sqlParameters);
+            var tutorialsList = _unitOfWork.ExecuteReader("FindTutorials", sqlParameters).AsEnumerable();
             var tutorialsListModel = tutorialsList.Select(item =>
             {
-                var values = (object[])item;
-
                 return new Tutorial()
                 {
-                    Id = (int)values[0],
-                    Title = (string)values[1],
-                    Description = (string)values[2],
-                    Published = (bool)values[3]
+                    Id = item.Field<int>("Id"),
+                    Title = item.Field<string>("Title"),
+                    Description = item.Field<string>("Description"),
+                    Published = item.Field<bool>("Published")
                 };
             }).ToList();
 

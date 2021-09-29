@@ -25,12 +25,12 @@ const AddTutorial: React.FC = () => {
 
     TutorialDataService.create(data)
       .then(response => {
-        setTutorial({
-          id: response.data.id,
-          title: response.data.title,
-          description: response.data.description,
-          published: response.data.published
-        });
+        // setTutorial({
+        //   id: response.data.id,
+        //   title: response.data.title,
+        //   description: response.data.description,
+        //   published: response.data.published
+        // });
         setSubmitted(true);
         console.log(response.data);
       })
