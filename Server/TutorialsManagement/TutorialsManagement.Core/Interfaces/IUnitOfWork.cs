@@ -10,7 +10,6 @@ namespace TutorialsManagement.Core.Interfaces
 {
     public interface IUnitOfWork
     {
-        DataTable ExecuteReader(string commandText);
         DataTable ExecuteReader(string commandText, SqlParameter[] parameters = null);
         object ExecuteNonQuery(string commandText, SqlParameter[] parameters = null);
     }

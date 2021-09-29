@@ -19,36 +19,6 @@ namespace TutorialsManagement.DataAccess.Implementations
             _context = context;
         }
 
-        public DataTable ExecuteReader(string commandText)
-        {
-            var conn = new SqlConnection(_context.Database.GetDbConnection().ConnectionString);
-
-            try
-            {
-                if (conn.State == ConnectionState.Closed)
-                {
-                    conn.Open();
-                }
-
-                using (var cmd = new SqlCommand(commandText, conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    var da = new SqlDataAdapter(cmd);
-                    var ds = new DataSet();
-                    da.Fill(ds);
-
-                    conn.Close();
-
-                    return ds.Tables[0];
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public DataTable ExecuteReader(string commandText, SqlParameter[] parameters = null)
         {
             var conn = new SqlConnection(_context.Database.GetDbConnection().ConnectionString);
@@ -75,14 +45,16 @@ namespace TutorialsManagement.DataAccess.Implementations
                     var ds = new DataSet();
                     da.Fill(ds);
 
-                    conn.Close();
-
                     return ds.Tables[0];
                 }
             }
             catch (Exception)
             {
                 throw;
+            }
+            finally
+            {
+                conn.Close();
             }
         }
 
